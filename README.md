@@ -1,254 +1,411 @@
-# 🎓 Student Placement / Career Success Predictor
+````markdown
+# 🎓 Student Placement Package Predictor
 
-A machine learning project that predicts whether a student's profile lines
-up with a **High Package** or **Standard Package** placement outcome,
-based on academic performance, technical activity, and skill scores —
-wrapped in a Streamlit web app.
+An interactive Machine Learning web application that predicts whether a student's profile is more likely to align with a **High Package** or **Standard Package** placement outcome.
 
-**Tech stack:** Python, Pandas, NumPy, Scikit-learn, Matplotlib, Seaborn, Streamlit
+The application uses academic performance, technical activity, skills, and student profile information to generate a package-category prediction along with an estimated probability.
 
-**Dataset:** `student_placement_career_success_dataset_2026.csv` (20,000 rows, 20 columns)
+## 🚀 Live Demo
+
+👉 **[Try the Student Placement Package Predictor](https://student-placement-predictor-qc91.onrender.com/)**
 
 ---
 
-## 📁 Project Structure
+## 📌 Project Overview
 
+The **Student Placement Package Predictor** is a Machine Learning project designed to demonstrate the complete ML workflow — from data preprocessing and exploratory data analysis to model training, evaluation, and deployment.
+
+The project uses a Streamlit-based web interface where users can enter a student's profile and receive an instant prediction.
+
+### The application provides:
+
+- 🎯 High Package / Standard Package prediction
+- 📊 Estimated probability of a High Package
+- 🤖 Active Machine Learning model
+- 📈 Model comparison results
+- 🧮 Input values used for prediction
+- 📉 Confusion matrix of the selected model
+
+---
+
+## 🧠 Machine Learning Approach
+
+Three classification algorithms were trained and compared:
+
+1. **Logistic Regression**
+2. **Decision Tree**
+3. **Random Forest**
+
+Each model was evaluated using:
+
+- Accuracy
+- Precision
+- Recall
+- F1-score
+
+The model with the **highest F1-score** was automatically selected as the production model used by the application.
+
+### ML Pipeline
+
+```text
+Student Dataset
+      │
+      ▼
+Data Cleaning
+      │
+      ▼
+Missing Value Handling
+      │
+      ▼
+Categorical Encoding
+      │
+      ▼
+Train / Test Split
+      │
+      ▼
+Feature Scaling
+      │
+      ▼
+┌─────────────────────────┐
+│     Model Training      │
+│                         │
+│ Logistic Regression     │
+│ Decision Tree            │
+│ Random Forest            │
+└─────────────────────────┘
+      │
+      ▼
+Model Evaluation
+      │
+      ▼
+Best F1-Score Model
+      │
+      ▼
+Saved Model + Preprocessors
+      │
+      ▼
+Streamlit Application
+      │
+      ▼
+Prediction
+      │
+      ├── High Package
+      │
+      └── Standard Package
+````
+
+---
+
+## 🎯 Prediction Target
+
+The original dataset contains a `Placement_Status` column. However, the column has the same placement status for all records, so it does not provide meaningful variation for a classification problem.
+
+Therefore, the project derives a new target called:
+
+### `Placement_Package`
+
+The target is created using the median value of `Salary_LPA`.
+
+| Category            | Definition                                    |
+| ------------------- | --------------------------------------------- |
+| 🟢 High Package     | Salary is greater than or equal to the median |
+| 🟡 Standard Package | Salary is below the median                    |
+
+`Salary_LPA` is then removed from the model features to prevent **target leakage**, since it is directly used to create the target.
+
+---
+
+## 📊 Features Used
+
+The model uses a combination of academic, technical, skill-based, and profile features.
+
+### 👤 Profile
+
+* Age
+* Gender
+* College Tier
+* Specialization
+
+### 📚 Academic Performance
+
+* CGPA
+* Aptitude Test Score
+* Resume Score
+* Mock Interview Score
+
+### 💻 Technical Activity
+
+* DSA Problems Solved
+* LeetCode Rating
+* GitHub Contributions
+* Hackathons Participated
+* Internships
+* Certifications
+
+### 🛠️ Skills
+
+* Projects Completed
+* Communication Skills
+* AI/ML Skill Level
+* System Design Knowledge
+
+---
+
+## 🔄 Data Preprocessing
+
+The training pipeline performs the following preprocessing steps:
+
+* Handles missing numerical values using the median
+* Handles missing categorical values using the mode
+* Encodes categorical features using `LabelEncoder`
+* Scales numerical features using `StandardScaler`
+* Splits the dataset into training and testing sets
+* Uses stratified sampling for the train/test split
+
+The preprocessing objects are saved along with the trained model so that the same transformations can be applied to new user inputs.
+
+---
+
+## 📈 Model Evaluation
+
+The trained models are compared using:
+
+| Metric    | Purpose                              |
+| --------- | ------------------------------------ |
+| Accuracy  | Overall prediction correctness       |
+| Precision | Correctness of positive predictions  |
+| Recall    | Ability to identify positive cases   |
+| F1-score  | Balance between precision and recall |
+
+The complete comparison is stored in:
+
+```text
+model_comparison.csv
 ```
-placement_project/
-├── train_model.py       # Preprocessing + EDA + model training/comparison, saves model.pkl etc.
-├── app.py                # Streamlit web app that loads the saved model and makes predictions
-├── requirements.txt      # Python dependencies
-├── student_placement_career_success_dataset_2026.csv   # Your real dataset (place it here)
-├── eda_plots/             # EDA charts saved as PNGs (created by train_model.py)
-├── model_comparison.csv   # Accuracy/Precision/Recall/F1 for all 3 models
-├── generate_data.py       # No longer used — kept only as a synthetic-data fallback (see note below)
-└── model.pkl, scaler.pkl, label_encoders.pkl, target_encoder.pkl, feature_cols.pkl,
-    best_model_name.pkl, salary_median.pkl
-    # Saved model + preprocessing objects (created by train_model.py)
+
+The model with the best F1-score is used by the Streamlit application.
+
+---
+
+## 🖥️ Application
+
+The application is built using **Streamlit**.
+
+Users can enter:
+
+* Academic information
+* Technical activity
+* Skills
+* College and specialization details
+
+The application processes the input using the saved preprocessing objects and sends it to the trained model.
+
+### Prediction Output
+
+The application displays:
+
+```text
+Prediction:
+Likely a High Package profile
+
+Estimated probability of High Package:
+XX.X%
 ```
 
-> **`generate_data.py` is no longer part of the active pipeline.** It was
-> used to fabricate a placeholder dataset before you had real data. Now
-> that `train_model.py` reads `student_placement_career_success_dataset_2026.csv`
-> directly, you don't need to run it — it's left in the folder only as a
-> fallback if you ever want to demo the app without your real CSV.
+The input values used for the prediction can also be viewed inside the application.
 
 ---
 
-## ⚠️ A note on the target column
+## 🏗️ Project Structure
 
-The dataset's `Placement_Status` column is **constant** — every one of the
-20,000 rows is marked as placed. A column with no variation can't be used
-as a classification target; a model trained on it would just always
-predict "placed" without learning anything.
+```text
+student-placement-predictor/
+│
+├── app.py
+├── train_model.py
+├── requirements.txt
+├── README.md
+├── .gitignore
+├── .python-version
+│
+├── model.pkl
+├── scaler.pkl
+├── label_encoders.pkl
+├── target_encoder.pkl
+├── feature_cols.pkl
+├── best_model_name.pkl
+├── salary_median.pkl
+│
+└── model_comparison.csv
+```
 
-To keep the same placement-prediction framing while actually using the
-real signal in the data, `train_model.py` derives a new target,
-**`Placement_Package`**, by splitting `Salary_LPA` at its median
-(₹12.43 LPA in this dataset):
+### File Description
 
-- **High Package** — salary at or above the median
-- **Standard Package** — salary below the median
-
-`Salary_LPA` itself is then dropped from the model's input features (using
-it as a feature would leak the answer, since it's the source of the
-label). The original `Placement_Status` column is dropped entirely since
-it carries no information.
-
-If you'd rather predict **exact salary** instead of a High/Standard split,
-that's a regression task — see "Customizing" below.
-
----
-
-## 🧠 How It Works
-
-1. **Data** — Your real dataset, `student_placement_career_success_dataset_2026.csv`,
-   with features like CGPA, DSA problems solved, internships, certifications,
-   project count, communication skills, aptitude score, LeetCode rating,
-   GitHub contributions, hackathons, AI/ML skill level, system design
-   knowledge, resume score, mock interview score, gender, college tier, and
-   specialization.
-
-2. **Preprocessing & EDA** — `train_model.py`:
-   - Fills missing numeric values with the median and missing categorical
-     values with the mode (this dataset has no missing values, but the
-     logic is there for safety if you plug in messier data later).
-   - Derives the `Placement_Package` target from `Salary_LPA` (see note above).
-   - Encodes categorical columns (Gender, College_Tier, Specialization) with
-     `LabelEncoder`.
-   - Scales numeric features with `StandardScaler`.
-   - Generates EDA plots (target balance, CGPA vs package, correlation
-     heatmap, package rate by internships, AI/ML skill vs package) into
-     `eda_plots/`.
-
-3. **Model training & comparison** — trains **Logistic Regression**,
-   **Decision Tree**, and **Random Forest**, evaluates each with Accuracy,
-   Precision, Recall, and F1-score, and automatically picks the model with
-   the best F1-score as the "production" model. Results are saved to
-   `model_comparison.csv` and a confusion matrix plot. On this dataset all
-   three models land around 70-71% accuracy — a realistic result given the
-   underlying signal.
-
-4. **Streamlit app** — `app.py` loads the saved model and preprocessing
-   objects, presents a form for entering a student's profile, and returns
-   a **High Package / Standard Package** prediction along with a
-   probability estimate.
+| File                   | Purpose                                    |
+| ---------------------- | ------------------------------------------ |
+| `app.py`               | Streamlit application                      |
+| `train_model.py`       | Data preprocessing, EDA and model training |
+| `requirements.txt`     | Python dependencies                        |
+| `model.pkl`            | Trained best-performing model              |
+| `scaler.pkl`           | Saved feature scaler                       |
+| `label_encoders.pkl`   | Saved categorical encoders                 |
+| `target_encoder.pkl`   | Target label encoder                       |
+| `feature_cols.pkl`     | Feature order used during training         |
+| `best_model_name.pkl`  | Name of the selected model                 |
+| `salary_median.pkl`    | Median salary used for target creation     |
+| `model_comparison.csv` | Model evaluation results                   |
 
 ---
 
-## 🛠️ Step-by-Step: Build It Locally
+## 🛠️ Tech Stack
 
-### 1. Set up your environment
+* **Python**
+* **Pandas**
+* **NumPy**
+* **Scikit-learn**
+* **Joblib**
+* **Matplotlib**
+* **Seaborn**
+* **Streamlit**
+* **Render**
+
+---
+
+## 💻 Run Locally
+
+### 1. Clone the repository
+
 ```bash
-# Create and activate a virtual environment (recommended)
-python -m venv venv
-source venv/bin/activate        # On Windows: venv\Scripts\activate
+git clone https://github.com/aish-jamdar/student-placement-predictor.git
+cd student-placement-predictor
+```
 
-# Install dependencies
+### 2. Install dependencies
+
+```bash
 pip install -r requirements.txt
 ```
 
-### 2. Put the dataset in the project folder
-Make sure `student_placement_career_success_dataset_2026.csv` sits in the
-same folder as `train_model.py` and `app.py`. (No need to run
-`generate_data.py` — that was only for the earlier synthetic-data version
-of this project.)
+### 3. Run the Streamlit application
 
-### 3. Train and compare the models
-```bash
-python train_model.py
-```
-This will:
-- Print data info, missing-value counts, and classification reports for
-  all three models to your terminal.
-- Save EDA plots into `eda_plots/`.
-- Save the best-performing model and all preprocessing objects
-  (`model.pkl`, `scaler.pkl`, `label_encoders.pkl`, `target_encoder.pkl`,
-  `feature_cols.pkl`, `best_model_name.pkl`, `salary_median.pkl`).
-
-### 4. Run the Streamlit app
 ```bash
 streamlit run app.py
 ```
-This opens the app in your browser at `http://localhost:8501`. Fill in a
-student's profile and click **Predict package** to see the result.
+
+The application will be available at:
+
+```text
+http://localhost:8501
+```
 
 ---
 
-## ✏️ Customizing / Improving the Project
+## 🚀 Deployment
 
-- **Predict salary directly instead of a High/Standard split:** swap the
-  classification setup for a regression one — use `Salary_LPA` as `y`
-  directly, replace the three classifiers with regressors (e.g.
-  `LinearRegression`, `DecisionTreeRegressor`, `RandomForestRegressor`),
-  and score with MAE/RMSE/R² instead of Accuracy/Precision/Recall/F1.
-- **Use a different dataset:** point `DATA_PATH` in `train_model.py` to any
-  other CSV and update `NUMERIC_COLS` / `CATEGORICAL_COLS` / `TARGET_COL`
-  (and `SALARY_COL` / `UNUSED_COLS` if relevant) to match its column names.
-- **Add more models:** e.g. `xgboost.XGBClassifier`, `SVC`, or
-  `KNeighborsClassifier` — just add them to the `models` dict in
-  `train_model.py`.
-- **Hyperparameter tuning:** wrap the Random Forest / Decision Tree in
-  `GridSearchCV` or `RandomizedSearchCV` for better accuracy.
-- **Feature importance:** Random Forest and Decision Tree both expose
-  `.feature_importances_` — you could add a bar chart of this to `app.py`
-  or `train_model.py` to explain *why* a prediction was made.
-- **Class imbalance:** if your real dataset is imbalanced, consider
-  `class_weight="balanced"` in the models, or `SMOTE` from `imbalanced-learn`.
+The application is deployed using **Render**.
 
----
+### Deployment Flow
 
-## 🚀 Deployment Options
-
-### Option A — Streamlit Community Cloud (easiest, free)
-
-1. **Push your project to GitHub.**
-   ```bash
-   git init
-   git add .
-   git commit -m "Student Placement Prediction ML app"
-   git branch -M main
-   git remote add origin https://github.com/<your-username>/<repo-name>.git
-   git push -u origin main
-   ```
-   > Important: Commit the trained `.pkl` files **and** the dataset CSV too
-   > (or add a build step that runs `train_model.py` on deploy — see
-   > "Auto-train on startup" below), otherwise the deployed app won't find
-   > the model.
-
-2. Go to **[share.streamlit.io](https://share.streamlit.io)** and sign in
-   with GitHub.
-
-3. Click **"New app"**, select your repository, branch (`main`), and set
-   the main file path to `app.py`.
-
-4. Click **Deploy**. Streamlit Cloud will install `requirements.txt`
-   automatically and launch your app at a public URL like:
-   `https://<your-app-name>.streamlit.app`
-
-**Auto-train on startup (optional):** if you don't want to commit `.pkl`
-files to GitHub (you'll still need the dataset CSV committed), add this to
-the very top of `app.py`, before `load_artifacts()` is called:
-```python
-import os, subprocess
-if not os.path.exists("model.pkl"):
-    subprocess.run(["python", "train_model.py"])
-```
-This trains the model fresh the first time the app boots on the server.
-
-### Option B — Render.com
-
-1. Push your code to GitHub (same as above).
-2. On [render.com](https://render.com), create a **New Web Service** and
-   connect your repo.
-3. Set:
-   - **Build command:** `pip install -r requirements.txt && python train_model.py`
-   - **Start command:** `streamlit run app.py --server.port $PORT --server.address 0.0.0.0`
-4. Deploy — Render gives you a public HTTPS URL.
-
-### Option C — Docker (deploy anywhere: AWS, GCP, Azure, etc.)
-
-Create a `Dockerfile` in the project root:
-```dockerfile
-FROM python:3.11-slim
-
-WORKDIR /app
-COPY . /app
-
-RUN pip install --no-cache-dir -r requirements.txt
-RUN python train_model.py
-
-EXPOSE 8501
-CMD ["streamlit", "run", "app.py", "--server.port=8501", "--server.address=0.0.0.0"]
+```text
+GitHub Repository
+        │
+        ▼
+      Render
+        │
+        ▼
+Install Dependencies
+        │
+        ▼
+Run Streamlit
+        │
+        ▼
+   Live Web App
 ```
 
-Build and run:
+### Render Configuration
+
+**Build Command**
+
 ```bash
-docker build -t placement-predictor .
-docker run -p 8501:8501 placement-predictor
+pip install -r requirements.txt
 ```
-Then push the image to any container registry (Docker Hub, ECR, GCR) and
-deploy it on your cloud platform of choice.
 
-### Option D — Hugging Face Spaces (free, great for ML demos)
+**Start Command**
 
-1. Create a new Space at [huggingface.co/new-space](https://huggingface.co/new-space),
-   choosing **Streamlit** as the SDK.
-2. Upload all the project files (`app.py`, `train_model.py`,
-   `requirements.txt`, the dataset CSV, and the `.pkl` files or the
-   auto-train snippet from Option A).
-3. The Space builds and launches automatically, giving you a public URL.
+```bash
+streamlit run app.py --server.port $PORT --server.address 0.0.0.0
+```
+
+### 🌐 Live Application
+
+**[Student Placement Package Predictor](https://student-placement-predictor-qc91.onrender.com/)**
 
 ---
 
-## 📌 Resume-Ready Summary
+## ⚠️ Limitations
 
-> Designed and implemented a Student Placement Prediction System using
-> machine learning to estimate placement outcomes from student academic
-> profiles and technical skills. Preprocessed datasets, handled missing
-> values, encoded categorical features, and performed exploratory data
-> analysis to extract meaningful insights. Implemented and compared
-> classification algorithms — Logistic Regression, Decision Tree, and
-> Random Forest — achieving optimized prediction performance. Integrated
-> the trained model into a user-friendly Streamlit application for
-> instant placement predictions.
+This project provides a **Machine Learning-based estimate** and should not be considered a guaranteed prediction of an actual placement package.
+
+Real-world placement outcomes can depend on several factors that may not be represented in the dataset, such as:
+
+* Company-specific requirements
+* Interview performance
+* Job market conditions
+* Role and industry
+* Communication and interpersonal factors
+* Individual hiring decisions
+
+The application is primarily intended for **educational and demonstration purposes**.
+
+---
+
+## 🔮 Future Improvements
+
+Potential improvements include:
+
+* 📌 Predicting exact salary using regression
+* ⚙️ Hyperparameter tuning
+* 🔁 Cross-validation
+* 📊 Feature importance visualization
+* 🔍 Explainable AI using SHAP
+* 🤖 Additional Machine Learning algorithms
+* 📚 Larger and more diverse datasets
+* 💡 Personalized career recommendations
+* 🔄 Automated model retraining
+
+---
+
+## 🎓 Learning Outcomes
+
+This project demonstrates practical experience with:
+
+* Data preprocessing
+* Exploratory Data Analysis
+* Feature engineering
+* Categorical encoding
+* Feature scaling
+* Classification algorithms
+* Model comparison
+* Model evaluation
+* Model serialization
+* Streamlit application development
+* Cloud deployment
+* GitHub-based project management
+
+---
+
+## 👩‍💻 Author
+
+### Aishwarya Jamdar
+
+**Project:** Student Placement Package Predictor
+
+🌐 **Live Demo:**
+[https://student-placement-predictor-qc91.onrender.com/](https://student-placement-predictor-qc91.onrender.com/)
+
+---
+
+⭐ If you found this project interesting, feel free to explore the repository and try the live application!
+
+```
+```
