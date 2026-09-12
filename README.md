@@ -1,4 +1,4 @@
-````markdown
+
 # 🎓 Student Placement Package Predictor
 
 An interactive Machine Learning web application that predicts whether a student's profile is more likely to align with a **High Package** or **Standard Package** placement outcome.
@@ -404,8 +404,3 @@ This project demonstrates practical experience with:
 [https://student-placement-predictor-qc91.onrender.com/](https://student-placement-predictor-qc91.onrender.com/)
 
 ---
-
-⭐ If you found this project interesting, feel free to explore the repository and try the live application!
-
-```
-```
